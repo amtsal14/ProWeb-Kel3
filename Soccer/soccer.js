@@ -1,10 +1,10 @@
-// select canvas element
+// memilih elemen canvas
 const canvas = document.getElementById("soccer");
 
-// getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
+// metode & property untuk menggambar elemen pada canvas
 const ctx = canvas.getContext('2d');
 
-// load sounds
+// suara
 let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
@@ -15,7 +15,7 @@ wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
 
-// Ball object
+// mendeskripsikan bola
 const ball = {
     x : canvas.width/2,
     y : canvas.height/2,
@@ -26,61 +26,36 @@ const ball = {
     color : "WHITE"
 }
 
-// User Paddle
+// mendeskripsikan pemain
 let i;
 const user = {
-    x : 70, // left side of canvas
-    y : (canvas.height - 100)/2, // -100 the height of paddle
+    x : 70, // posisi x awal = 70 px dari sisi kiri canvas
+    y : (canvas.height - 30)/2, // posisi y awal = (tinggi canvas - tinggi pemain) / 2
     width : 20,
     height : 30,
+    speed : 7,
     score : 0,
+    rate : 0,
     color : "BLUE"
 }
 
-// COM Paddle
+// mendeskripsikan lawan
 const com = {
-    x : canvas.width - 90, // - width of paddle
-    y : (canvas.height - 100)/2, // -100 the height of paddle
+    x : canvas.width - 90, // posisi x awal = lebar canvas - lebar lawan - 70 px dari sisi kanan canvas
+    y : (canvas.height - 30)/2, // posisi y awal = (tinggi canvas - tinggi lawan) / 2
     width : 20,
     height : 30,
     score : 0,
     color : "RED"
 }
 
-// NET
-const net = {
-    x : (canvas.width - 2)/2,
-    y : 0,
-    height : 10,
-    width : 2,
-    color : "WHITE"
-}
-
-// Goal User
-const goalUser = {
-    x : 0,
-    y : (canvas.height - 100)/2,
-    width : 30,
-    height : 100,
-    color : "WHITE"
-}
-
-// Goal COM
-const goalCOM = {
-    x : canvas.width - 30,
-    y : (canvas.height - 100)/2,
-    width : 30,
-    height : 100,
-    color : "WHITE"
-}
-
-// draw a rectangle, will be used to draw paddles
+// fungsi untuk menggambar persegi
 function drawRect(x, y, w, h, color){
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
 }
 
-// draw circle, will be used to draw the ball
+// fungsi untuk menggambar lingkaran
 function drawArc(x, y, r, color){
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -89,17 +64,14 @@ function drawArc(x, y, r, color){
     ctx.fill();
 }
 
-// listening to the mouse
+// fungsi untuk menggerakan pemain menggunakan mouse
 canvas.addEventListener("mousemove", getMousePos);
-
 function getMousePos(evt){
     let rect = canvas.getBoundingClientRect();
-    if (ball.y > 10 && ball.y <390){
-        user.y = evt.clientY - rect.top - user.height/2;
-    }
+    user.y = evt.clientY - rect.top - user.height/2;
 }
 
-// when COM or USER scores, we reset the ball
+// fungsi mengembalikan bola ke posisi awal
 function resetBall(){
     ball.x = canvas.width/2;
     ball.y = canvas.height/2;
@@ -107,27 +79,21 @@ function resetBall(){
     ball.speed = 7;
 }
 
-// draw the net
-function drawNet(){
-    for(let i = 0; i <= canvas.height; i+=15){
-        drawRect(net.x, net.y + i, net.width, net.height, net.color);
-    }
-}
-
-//draw the goal
-function drawGoal(){
-    drawRect(goalUser.x, goalUser.y, goalUser.width, goalUser.height, goalUser.color);
-    drawRect(goalCOM.x, goalCOM.y, goalCOM.width, goalCOM.height, goalCOM.color);
-}
-
-// draw text
-function drawText(text,x,y){
+// fungsi menggambar skor
+function drawScore(text,x,y){
     ctx.fillStyle = "#FFF";
-    ctx.font = "75px fantasy";
+    ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
 
-// collision detection
+// fungsi menggambar rating
+function drawRate(text,x,y){
+    ctx.fillStyle = "#FFF";
+    ctx.font = "20px fantasy";
+    ctx.fillText(text, x, y);
+}
+
+// fungsi mendeteksi benturan
 function collision(b,p){
     p.top = p.y;
     p.bottom = p.y + p.height;
@@ -142,105 +108,165 @@ function collision(b,p){
     return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
 }
 
-// update function, the function that does all calculations
+// fungsi untuk melakukan segala perhitungan
 function update(){
     
-    // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
-    if( ball.x - ball.radius < 0 && ball.y > 150 && ball.y < 250){
-        com.score++;
-        comScore.play();
-        resetBall();
-    }else if( ball.x + ball.radius > canvas.width && ball.y > 150 && ball.y < 250){
-        user.score++;
+    // kondisi apabila mencetak skor
+    if( ball.x - ball.radius < 0 && ball.y > 150 && ball.y < 250){ // bola memasuki gawang pemain
+        com.score++; // skor lawan bertambah 1
+        comScore.play(); 
+        resetBall(); // mengembalikan bola ke posisi awal
+    }else if( ball.x + ball.radius > canvas.width && ball.y > 150 && ball.y < 250){ // bola memasuki gawang lawan
+        if(user.score <= com.score-1 && user.score >= com.score-2){ // pemain sedang tertinggal 1 sampai 2 gol
+            user.rate += 6; // rating bertambah 6
+        }else if(user.score < com.score-2){ // pemain sedang tertinggal lebih dari 2 gol
+            user.rate += 4; // rating bertambah 4
+        } else{
+            for(i=0;i<(8 + (user.score - com.score)*3);i++){ // pemain sedang unggul
+                user.rate++; // rating bertambah 8 + (selisih gol * 3)
+            }
+        }
+        user.score++; // skor pemain bertambah 1
         userScore.play();
-        resetBall();
+        resetBall(); // mengambalikan bola ke posisi awal
+    }
+
+    // mengatasi bug dimana bola keluar lapangan
+    if(ball.y < 0){
+        ball.y = 20;
+    }else if(ball.y > 400){
+        ball.y = 380;
     }
     
-    // the ball has a velocity
+    // perpindahan posisi bola berdasarkan kecepatan bola
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
-    
-    // computer plays for itself, and we must be able to beat it
-    // simple AI
-    if(ball.y > 20 && ball.y < 380){
-        com.y += (ball.y - (com.y + com.height/2))*0.09;
+
+    // AI lawan
+    if(ball.y > 10 && ball.y < 390 && user.score < com.score){ // bola di dalam lapangan & lawan sedang unggul
+        com.y += (ball.y - (com.y + com.height/2))*0.06; // lawan bergerak mengikuti posisi bola di sumbu y dengan kecepatan 0.06
+    } else if(ball.y > 10 && ball.y < 390 && user.score == com.score){ // bola di dalam lapangan & skor seri
+        com.y += (ball.y - (com.y + com.height/2))*0.08; // lawan bergerak mengikuti posisi bola di sumbu y dengan kecepatan 0.08
+    } else if(ball.y > 10 && ball.y < 390 && user.score > com.score){ // bola di dalam lapangan & pemain sedang unggul
+        com.y += (ball.y - (com.y + com.height/2))*(0.08 + (user.score - com.score)/50); // lawan begerak mengikuti posisi bola di sumbu y dengan kecepatan 0.08 + selisih gol / 50
     }
     
-    // when the ball collides with bottom and top walls we inverse the y velocity.
+    // kondisi bola menyentuh sisi atas atau bawah lapangan
     if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
-        ball.velocityY = -ball.velocityY;
+        ball.velocityY = -ball.velocityY; // membalikkan arah bola di sumbu y dengan kecepatan tetap
         wall.play();
     }
 
-    // when the ball collides with left and rigth walls we inverse the x velocity.
+    // kondisi bola menyentuk sisi kanan atau kiri lapangan
     if(ball.x - ball.radius < 0 || ball.x + ball.radius - 100 > canvas.height + 100){
-        ball.velocityX = -ball.velocityX;
+        ball.velocityX = -ball.velocityX; // membalikkan arah bola di sumbu x dengan kecepatan tetap
         wall.play();
     }
     
-    // we check if the paddle hit the user or the com paddle
+    // mengecek apakah bola sejajar pemain atau lawan di sumbu x
     let player = (ball.x + ball.radius < canvas.width/2) ? user : com;
     
-    // if the ball hits a paddle
+    // kondisi bola menyentuh pemain atau lawan
     if(collision(ball,player)){
-        // play sound
         hit.play();
-        // we check where the ball hits the paddle
+
+        // mengecek apakah bola menyentuh pemain ataupun lawan
         let collidePoint = (ball.y - (player.y + player.height/2));
-        // normalize the value of collidePoint, we need to get numbers between -1 and 1.
+
+        // normalisasi nilai dari titik benturan untuk mendapatkan angka antara -1 dan 1
         // -player.height/2 < collide Point < player.height/2
         collidePoint = collidePoint / (player.height/2);
         
-        // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
-        // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
-        // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
-        // Math.PI/4 = 45degrees
+        // ketika bola menyentuh bagian atas pemain / lawan, bola mengambil sudut -45 derajat
+        // ketika bola menyentuh bagian tengah pemain / lawan, bola mengambil sudut 0 derajat
+        // ketika bola menyentuh bagian bawah pemain / lawan, bola mengambil sudut 45 derajat
+        // Math.PI/4 = 45 derajat
         let angleRad = (Math.PI/4) * collidePoint;
         
-        // change the X and Y velocity direction
+        // mengubah kecepatan pada sumbu x dan y
         let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
         
-        // speed up the ball everytime a paddle hits it.
-        ball.speed += 0.1;
+        // menambah kecepatan bola setiap benturan dengan pemain atau lawan
+        ball.speed += 0.2; // kecepatan bola bertambah 0.2
     }
 }
 
-// render function, the function that does al the drawing
+// fungsi render untuk menggambar berbagai objek pada canvas
 function render(){
     
-    // clear the canvas
+    // membersihkan canvas dengan warna hijau sebagai dasar lapangan
     drawRect(0, 0, canvas.width, canvas.height, "green");
     
-    // draw the user score to the left
-    drawText(user.score,canvas.width/4,canvas.height/5);
+    // menggambar skor pemain
+    drawScore(user.score,canvas.width/4 - 25,canvas.height/6);
     
-    // draw the COM score to the right
-    drawText(com.score,3*canvas.width/4,canvas.height/5);
-    
-    // draw the net
-    drawNet();
+    // menggambarkan skor lawan
+    drawScore(com.score,3*canvas.width/4 - 25,canvas.height/6);
 
-    // draw the goal
-    drawGoal();
+    // menggambarkan rating
+    drawRate("Rate : "+user.rate,20,canvas.height-30);
     
-    // draw the user's paddle
+    // menggambar garis lapangan
+    // menggambar lingkaran tengah lapangan
+    drawArc(canvas.width/2,canvas.height/2,85,"white");
+    drawArc(canvas.width/2,canvas.height/2,80,"green");
+
+    // menggambar garis tengah
+    drawRect(canvas.width/2-2.5,0,5,400,"white")
+
+    // menggambar kotak penalti pemain
+    drawArc(105,canvas.height/2,55,"white");
+    drawArc(105,canvas.height/2,50,"green");
+    drawRect(0,canvas.height/2-105,105,210,"white")
+    drawRect(0,canvas.height/2-100,100,200,"green")
+    drawRect(0,canvas.height/2-55,35,110,"white")
+    drawRect(0,canvas.height/2-50,30,100,"darkgreen")
+
+    // menggambar kotak penalti lawan
+    drawArc(canvas.width-105,canvas.height/2,55,"white");
+    drawArc(canvas.width-105,canvas.height/2,50,"green");
+    drawRect(canvas.width-105,canvas.height/2-105,105,210,"white")
+    drawRect(canvas.width-100,canvas.height/2-100,100,200,"green")
+    drawRect(canvas.width-35,canvas.height/2-55,35,110,"white")
+    drawRect(canvas.width-30,canvas.height/2-50,30,100,"darkgreen")
+
+    // menggambar titik
+    drawArc(canvas.width/2,canvas.height/2,5,"white"); // titik tengah lapangan
+    drawArc(70,canvas.height/2,5,"white"); // titik penalti pemain
+    drawArc(canvas.width-70,canvas.height/2,5,"white"); // titik penalti lawan
+
+    // menggambar titik sudut
+    // atas kiri
+    drawArc(0,0,8,"white");
+    drawArc(0,0,5,"green");
+    // atas kanan
+    drawArc(canvas.width,0,8,"white");
+    drawArc(canvas.width,0,5,"green");
+    // bawah kiri
+    drawArc(0,canvas.height,8,"white");
+    drawArc(0,canvas.height,5,"green");
+    // bawah kanan
+    drawArc(canvas.width,canvas.height,8,"white");
+    drawArc(canvas.width,canvas.height,5,"green");
+    
+    // menggambar pemain
     drawRect(user.x, user.y, user.width, user.height, user.color);
-    
-    // draw the COM's paddle
+
+    // menggambar lawan
     drawRect(com.x, com.y, com.width, com.height, com.color);
     
-    // draw the ball
+    // menggambar bola
     drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
+
+// fungsi game untuk memanggil fungsi update dan game
 function game(){
     update();
     render();
 }
-// number of frames per second
-let framePerSecond = 50;
 
-//call the game function 50 times every 1 Sec
-let loop = setInterval(game,1000/framePerSecond);
+let framePerSecond = 50; // nilai frame per detik
+let loop = setInterval(game,1000/framePerSecond); // perulangan memanggil fungsi game 50 kali tiap 1 detik
 
