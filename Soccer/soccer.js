@@ -237,20 +237,6 @@ function render(){
     drawArc(70,canvas.height/2,5,"white"); // titik penalti pemain
     drawArc(canvas.width-70,canvas.height/2,5,"white"); // titik penalti lawan
 
-    // menggambar titik sudut
-    // atas kiri
-    drawArc(0,0,8,"white");
-    drawArc(0,0,5,"green");
-    // atas kanan
-    drawArc(canvas.width,0,8,"white");
-    drawArc(canvas.width,0,5,"green");
-    // bawah kiri
-    drawArc(0,canvas.height,8,"white");
-    drawArc(0,canvas.height,5,"green");
-    // bawah kanan
-    drawArc(canvas.width,canvas.height,8,"white");
-    drawArc(canvas.width,canvas.height,5,"green");
-    
     // menggambar pemain
     drawRect(user.x, user.y, user.width, user.height, user.color);
 
