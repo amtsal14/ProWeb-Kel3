@@ -1,8 +1,9 @@
 body{
-    background-color: dimgray;
+    background-color: lightgrey;
 }
 #soccer{
-    border: 2px solid #FFF;
+    border: 6px solid #FFF;
+    border-radius: 32px;
     position: absolute;
     margin :auto;
     top:0;
@@ -10,4 +11,5 @@ body{
     left:0;
     bottom:0;
     color :green;
+    box-shadow: 12px 12px 0px 0px rgba(0,0,0,0.75);
 }
