@@ -1,6 +1,4 @@
-//I've tried to explain each JavaScript line with comments....Hope you'll understand
-
-//selecting all required elements
+//selecting all elements
 const selectBox = document.querySelector(".select-box"),
 selectBtnX = selectBox.querySelector(".options .playerX"),
 selectBtnO = selectBox.querySelector(".options .playerO"),
@@ -11,51 +9,50 @@ resultBox = document.querySelector(".result-box"),
 wonText = resultBox.querySelector(".won-text"),
 replayBtn = resultBox.querySelector("button");
 
-window.onload = ()=>{ //once window loaded
-    for (let i = 0; i < allBox.length; i++) { //add onclick attribute in all available span
+window.onload = ()=>{ //Windows pertama diload
+    for (let i = 0; i < allBox.length; i++) { //menabahkan onleClick attribute
        allBox[i].setAttribute("onclick", "clickedBox(this)");
     }
 }
 
 selectBtnX.onclick = ()=>{
-    selectBox.classList.add("hide"); //hide select box
-    playBoard.classList.add("show"); //show the playboard section
+    selectBox.classList.add("hide"); //menyembunyikan select box
+    playBoard.classList.add("show"); //menampilkan playboard
 }
 
 selectBtnO.onclick = ()=>{ 
-    selectBox.classList.add("hide"); //hide select box
-    playBoard.classList.add("show"); //show the playboard section
-    players.setAttribute("class", "players active player"); //set class attribute in players with players active player values
+    selectBox.classList.add("hide"); //menyembunyikan select box
+    playBoard.classList.add("show"); //menampilkan playboard
+    players.setAttribute("class", "players active player"); //set class attribute pada pemain dengan nilai aktif
 }
 
-let playerXIcon = "fas fa-times"; //class name of fontawesome cross icon
-let playerOIcon = "far fa-circle"; //class name of fontawesome circle icon
-let playerSign = "X"; //this is a global variable beacuse we've used this variable inside multiple functions
-let runBot = true; //this also a global variable with boolen value..we used this variable to stop the bot once match won by someone or drawn
+let playerXIcon //class name X Icon
+let playerOIcon //class name O Icon
+let playerSign = "X"; //Global variabel untuk miltiple function
+let runBot = true; //Global variabel untuk menonaktifkan Bot
 
-// user click function
+// Fungsi Click pengguna
 function clickedBox(element){
     if(players.classList.contains("player")){
-        playerSign = "O"; //if player choose (O) then change playerSign to O
-        // element.innerHTML = `<i class="${playerOIcon}"></i>`; //adding circle icon tag inside user clicked element/box
-        element.innerHTML = `<img src="img/o.svg" style="height: 32px;" alt="O">`; //adding circle icon tag inside user clicked element/box
-        players.classList.add("active"); ///add active class in players
-        element.setAttribute("id", playerSign); //set id attribute in span/box with player choosen sign
+        playerSign = "O"; //Jika player memilih (O) maka akan mengganti variable playerSign ke O
+        element.innerHTML = `<img src="img/o.svg" style="height: 32px;" alt="O">`; //menambahkan Icon (O) kedalam Clicked User Element
+        players.classList.add("active"); //menambahkan class active player
+        element.setAttribute("id", playerSign); //Set attribute untuk pilihan player
     }else{
-        element.innerHTML = `<img src="img/x.svg" style="height: 32px;" alt="X">`; //adding cross icon tag inside user clicked element/box
-        players.classList.add("active"); //add active class in players
-        element.setAttribute("id", playerSign); //set id attribute in span/box with player choosen sign
+        element.innerHTML = `<img src="img/x.svg" style="height: 32px;" alt="X">`; //menambahkan Icon (X) kedalam Clicked Element
+        players.classList.add("active");
+        element.setAttribute("id", playerSign);
     }
-    selectWinner(); //caliing selectWinner function
-    element.style.pointerEvents = "none"; //once user select any box then that box can'be clicked again
-    playBoard.style.pointerEvents = "none"; //add pointerEvents none to playboard so user can't immediately click on any other box until bot select
-    let randomTimeDelay = ((Math.random() * 1000) + 200).toFixed(); //generating random number so bot will randomly delay to select unselected box
+    selectWinner(); //Fungsi untuk memanggil pemengang game
+    element.style.pointerEvents = "none"; //Ketika player sudah memilih board, tidak dapat memilih kembali
+    playBoard.style.pointerEvents = "none"; //Menambahkan pointerEvents none sehingga player tidak dapat memilih sebelum Bot selesai
+    let randomTimeDelay = ((Math.random() * 1000) + 200).toFixed(); //membuat random number sehingga Bot akan memberi jeda permainan
     setTimeout(()=>{
-        bot(runBot); //calling bot function
+        bot(runBot); //Memanggil Fungsi Bot
     }, randomTimeDelay); //passing random delay value
 }
 
-// bot auto select function
+//bot auto select function
 function bot(){
     let array = []; //creating empty array...we'll store unclicked boxes index
     if(runBot){ //if runBot is true
@@ -68,13 +65,13 @@ function bot(){
         let randomBox = array[Math.floor(Math.random() * array.length)]; //getting random index from array so bot will select random unselected box
         if(array.length > 0){ //if array length is greater than 0
             if(players.classList.contains("player")){ 
-                playerSign = "X"; //if player has chosen O then bot will X
-                allBox[randomBox].innerHTML = `<img src="img/x.svg" style="height: 32px;" alt="X">`; //adding cross icon tag inside bot selected element
-                players.classList.remove("active"); //remove active class in players
+                playerSign = "X"; //Jika player memilih (O) maka Bot akan menjadi (X)
+                allBox[randomBox].innerHTML = `<img src="img/x.svg" style="height: 32px;" alt="X">`; //menambahkan Icon (X) kedalam Clicked Bot Element
+                players.classList.remove("active"); //Menghapus active player pada user
                 allBox[randomBox].setAttribute("id", playerSign); //set id attribute in span/box with player choosen sign
             }else{
-                allBox[randomBox].innerHTML = `<img src="img/o.svg" style="height: 32px;" alt="O">`; //adding circle icon tag inside bot selected element
-                players.classList.remove("active"); //remove active class in players
+                allBox[randomBox].innerHTML = `<img src="img/o.svg" style="height: 32px;" alt="O">`; //menambahkan Icon (O) kedalam Clicked Bot Element
+                players.classList.remove("active"); //Menghapus active player pada user
                 allBox[randomBox].setAttribute("id", playerSign); //set id attribute in span/box with player choosen sign
             }
             selectWinner(); //calling selectWinner function
